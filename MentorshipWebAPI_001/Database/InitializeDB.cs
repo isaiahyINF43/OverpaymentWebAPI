@@ -14,8 +14,14 @@ namespace MentorshipWebAPI_001.Database
                                         [Key] NVARCHAR(2048) NULL,
                                         [Value] VARCHAR(2048) NULL
                                         )";
-            System.Data.SQLite.SQLiteConnection.CreateFile("C:/Users/Isaiah/Mentorship WebAPI SQLite DB Files/databaseFile2.db3");
-            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=C:/Users/Isaiah/Mentorship WebAPI SQLite DB Files/databaseFile2.db3"))
+
+            //Configure where db file is created
+            string executable = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string path = (System.IO.Path.GetDirectoryName(executable));
+            AppDomain.CurrentDomain.SetData("DataDirectory", path);
+
+            System.Data.SQLite.SQLiteConnection.CreateFile(path + "/databaseFile2.db3");
+            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=|DataDirectory|/databaseFile2.db3"))
             {
                 using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
                 {

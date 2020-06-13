@@ -1,9 +1,12 @@
-﻿using System;
+﻿using MentorshipWebAPI_001.Classes;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Text.Json;
 
 namespace MentorshipWebAPI_001.Controllers
 {
@@ -11,14 +14,14 @@ namespace MentorshipWebAPI_001.Controllers
     {
         static List<String> strings = new List<String>()
         {
-            "value0", "value1", "value2"
         };
         // GET api/values
         public IEnumerable<string> Get()
         {
             //return strings;
+            strings.Clear();
             string selectQuery = @"SELECT * FROM MyTable";
-            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=C:/Users/Isaiah/Mentorship WebAPI SQLite DB Files/databaseFile2.db3"))
+            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=|DataDirectory|/databaseFile2.db3"))
             {
                 using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
                 {
@@ -29,10 +32,9 @@ namespace MentorshipWebAPI_001.Controllers
 
                     using (System.Data.SQLite.SQLiteDataReader reader = com.ExecuteReader())
                     {
-                        strings.Clear();
                         while (reader.Read())
                         {
-                            strings.Add(reader["Key"] + " : " + reader["Value"]);     // Display the value of the key and value column for every row
+                            strings.Add(reader["Key"] + ":" + reader["Value"]);     // Display the value of the key and value column for every row
                         }
                     }
                     conn.Close();        // Close the connection to the database
@@ -48,12 +50,13 @@ namespace MentorshipWebAPI_001.Controllers
         }
 
         // POST api/values
-        public void Post([FromBody]string value)
+        public void Post([FromBody]Object value)
         {
             //strings.Add(value);
-            string insertNewRowQuery = @"INSERT INTO MyTable (Key,Value) Values ('key "
-                                       + value + "', 'value " + value + "')";
-            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=C:/Users/Isaiah/Mentorship WebAPI SQLite DB Files/databaseFile2.db3"))
+            DataClass001 dataClass001 = System.Text.Json.JsonSerializer.Deserialize<DataClass001>(value.ToString());
+            string insertNewRowQuery = @"INSERT INTO MyTable (Key,Value) Values ('"
+                                       + dataClass001.Key + "','" + dataClass001.Value + "')";
+            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=|DataDirectory|/databaseFile2.db3"))
             {
                 using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
                 {
@@ -62,7 +65,7 @@ namespace MentorshipWebAPI_001.Controllers
                     com.CommandText = insertNewRowQuery;     // Set CommandText to our query that will insert a row into the table
                     com.ExecuteNonQuery();                  // Execute the query
 
-                    com.CommandText = "Select * FROM MyTable";      // Select all rows from our database table
+                    /*com.CommandText = "Select * FROM MyTable";      // Select all rows from our database table
 
                     using (System.Data.SQLite.SQLiteDataReader reader = com.ExecuteReader())
                     {
@@ -70,14 +73,14 @@ namespace MentorshipWebAPI_001.Controllers
                         {
                             Console.WriteLine(reader["Key"] + " : " + reader["Value"]);     // Display the value of the key and value column for every row
                         }
-                    }
+                    }*/
                     conn.Close();        // Close the connection to the database
                 }
             }
         }
 
         // PUT api/values/5
-        public void Put(int id, [FromBody]Object value)
+        public void Put(int id, [FromBody]string value)
         {
             strings[id] = value;
         }
