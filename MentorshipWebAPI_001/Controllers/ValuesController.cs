@@ -20,8 +20,9 @@ namespace MentorshipWebAPI_001.Controllers
         {
             //return strings;
             strings.Clear();
-            string selectQuery = @"SELECT * FROM MyTable";
-            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=|DataDirectory|/databaseFile2.db3"))
+            string selectQuery = @"SELECT * FROM OverPaymentDetail";
+            //using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:/Users/Isaiah Yu/SQLite Databases/Overpayment_WebAPI.db", true))
+            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\inetpub\wwwroot\overpayment_webapi\database\Overpayment_WebAPI.db", true))
             {
                 using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
                 {
@@ -34,7 +35,17 @@ namespace MentorshipWebAPI_001.Controllers
                     {
                         while (reader.Read())
                         {
-                            strings.Add(reader["Key"] + ":" + reader["Value"]);     // Display the value of the key and value column for every row
+                            strings.Add(
+                                "ID : " + reader["ID"].ToString() + 
+                                "OverPaymentID : " + reader["OverPaymentID"].ToString() +
+                                "MemberID : " + reader["MemberID"].ToString() +
+                                "ClaimNumber : " + reader["ClaimNumber"].ToString() +
+                                "BalanceAmt : " + reader["BalanceAmt"].ToString() +
+                                "OverPaymentAmt : " + reader["OverPaymentAmt"].ToString() +
+                                "CreateDate : " + reader["CreateDate"].ToString() +
+                                "SysSrcSyncDate : " + reader["SysSrcSyncDate"].ToString() +
+                                "LastUpdated : " + reader["LastUpdated"].ToString()
+                                );     // Display the value of the key and value column for every row
                         }
                     }
                     conn.Close();        // Close the connection to the database
@@ -53,10 +64,19 @@ namespace MentorshipWebAPI_001.Controllers
         public void Post([FromBody]Object value)
         {
             //strings.Add(value);
-            DataClass001 dataClass001 = System.Text.Json.JsonSerializer.Deserialize<DataClass001>(value.ToString());
-            string insertNewRowQuery = @"INSERT INTO MyTable (Key,Value) Values ('"
-                                       + dataClass001.Key + "','" + dataClass001.Value + "')";
-            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection("data source=|DataDirectory|/databaseFile2.db3"))
+            //OverPaymentDetailReceive overPaymentDetailReceive = System.Text.Json.JsonSerializer.Deserialize<OverPaymentDetailReceive>(value.ToString());
+            OverPaymentDetailReceive overPaymentDetailReceive = JsonConvert.DeserializeObject<OverPaymentDetailReceive>(value.ToString());
+            string insertNewRowQuery = @"INSERT INTO OverPaymentDetail (OverPaymentID, MemberID, ClaimNumber, BalanceAmt, OverPaymentAmt, CreateDate, SysSrcSyncDate, LastUpdated) Values (
+                                        " + overPaymentDetailReceive.OverPaymentID +
+                                        "," + overPaymentDetailReceive.MemberID +
+                                        ",'" + overPaymentDetailReceive.ClaimNumber +
+                                        "'," + overPaymentDetailReceive.BalanceAmt +
+                                        "," + overPaymentDetailReceive.OverPaymentAmt +
+                                        ",'" + overPaymentDetailReceive.CreateDate +
+                                        "','" + overPaymentDetailReceive.SysSrcSyncDate +
+                                        "','" + overPaymentDetailReceive.LastUpdated +
+                                        "')";
+            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source = C:\inetpub\wwwroot\overpayment_webapi\database\Overpayment_WebAPI.db"))
             {
                 using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
                 {
