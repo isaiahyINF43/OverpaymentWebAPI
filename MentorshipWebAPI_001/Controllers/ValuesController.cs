@@ -16,48 +16,142 @@ namespace MentorshipWebAPI_001.Controllers
         {
         };
         // GET api/values
-        public IEnumerable<string> Get()
+        public Object Get()
         {
-            //return strings;
+            List<OverPaymentDetailResponse> overpaymentList = new List<OverPaymentDetailResponse>();
             strings.Clear();
             string selectQuery = @"SELECT * FROM OverPaymentDetail";
-            //using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:/Users/Isaiah Yu/SQLite Databases/Overpayment_WebAPI.db", true))
-            using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\inetpub\wwwroot\overpayment_webapi\database\Overpayment_WebAPI.db", true))
+            try
             {
-                using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
+                //using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:/Users/Isaiah Yu/SQLite Databases/Overpayment_WebAPI.db", true))
+                using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\inetpub\wwwroot\overpayment_webapi\database\Overpayment_WebAPI.db", true))
                 {
-                    conn.Open();                             // Open the connection to the database
-
-                    com.CommandText = selectQuery;     // Set CommandText to our query that will select all rows from the table
-                    com.ExecuteNonQuery();                  // Execute the query
-
-                    using (System.Data.SQLite.SQLiteDataReader reader = com.ExecuteReader())
+                    using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
                     {
-                        while (reader.Read())
+                        conn.Open();                             // Open the connection to the database
+
+                        com.CommandText = selectQuery;     // Set CommandText to our query that will select all rows from the table
+                        com.ExecuteNonQuery();                  // Execute the query
+
+                        using (System.Data.SQLite.SQLiteDataReader reader = com.ExecuteReader())
                         {
-                            strings.Add(
-                                "ID : " + reader["ID"].ToString() + 
-                                "OverPaymentID : " + reader["OverPaymentID"].ToString() +
-                                "MemberID : " + reader["MemberID"].ToString() +
-                                "ClaimNumber : " + reader["ClaimNumber"].ToString() +
-                                "BalanceAmt : " + reader["BalanceAmt"].ToString() +
-                                "OverPaymentAmt : " + reader["OverPaymentAmt"].ToString() +
-                                "CreateDate : " + reader["CreateDate"].ToString() +
-                                "SysSrcSyncDate : " + reader["SysSrcSyncDate"].ToString() +
-                                "LastUpdated : " + reader["LastUpdated"].ToString()
-                                );     // Display the value of the key and value column for every row
+                            while (reader.Read())
+                            {
+                                strings.Add(
+                                    "ID : " + reader["ID"].ToString() +
+                                    "OverPaymentID : " + reader["OverPaymentID"].ToString() +
+                                    "MemberID : " + reader["MemberID"].ToString() +
+                                    "ClaimNumber : " + reader["ClaimNumber"].ToString() +
+                                    "BalanceAmt : " + reader["BalanceAmt"].ToString() +
+                                    "OverPaymentAmt : " + reader["OverPaymentAmt"].ToString() +
+                                    "CreateDate : " + reader["CreateDate"].ToString() +
+                                    "SysSrcSyncDate : " + reader["SysSrcSyncDate"].ToString() +
+                                    "LastUpdated : " + reader["LastUpdated"].ToString()
+                                    );     // Display the value of the key and value column for every row
+
+                                var debugg = reader["CreateDate"];
+                                var debugg2 = Convert.ToDateTime(reader["CreateDate"]);
+                                var debugg3 = DateTime.UtcNow;
+                                var debugg4 = DateTime.UtcNow.ToString();
+                                var debugg5 = System.Math.Round(Convert.ToDecimal(reader["OverpaymentAmt"]),2);
+                                var debugg6 = decimal.Round(Convert.ToDecimal(reader["OverpaymentAmt"]), 2, MidpointRounding.AwayFromZero);
+                                var debugg7 = String.Format("{0:0.00}", Convert.ToDecimal(reader["OverpaymentAmt"]));
+
+                                //Console.WriteLine(debugg);
+
+                                overpaymentList.Add(new OverPaymentDetailResponse()
+                                {
+                                    memberId = Convert.ToInt32(reader["MemberID"]),
+                                    claimNumber = reader["ClaimNumber"].ToString(),
+                                    balanceAmt = String.Format("{0:0.00}", Convert.ToDecimal(reader["BalanceAmt"])),
+                                    overpaymentAmt = String.Format("{0:0.00}", Convert.ToDecimal(reader["OverpaymentAmt"])),
+                                    createDate = Convert.ToDateTime(reader["CreateDate"]),
+                                    updateDate = Convert.ToDateTime(reader["LastUpdated"]),
+                                    amtPaid = String.Format("{0:0.00}", Convert.ToDecimal(reader["OverpaymentAmt"]) - Convert.ToDecimal(reader["BalanceAmt"])),
+                                    daysLeftToPay = (int)(Convert.ToDateTime(reader["CreateDate"]).Subtract(DateTime.UtcNow).TotalDays + 90)
+                                });
+                            }
                         }
+                        conn.Close();        // Close the connection to the database
                     }
-                    conn.Close();        // Close the connection to the database
                 }
+            } catch (Exception e)
+            {
+                Console.WriteLine("Data of error: " + e.Data);
+                Console.WriteLine("Source of error: " + e.Source);
             }
-            return strings;
+            //return strings;
+            //return JsonConvert.SerializeObject(overpaymentList, Newtonsoft.Json.Formatting.Indented);
+            return overpaymentList;
         }
 
         // GET api/values/5
-        public string Get(int id)
+        public Object Get(int id)
         {
-            return strings[id];
+            List<OverPaymentDetailResponse> overpaymentList = new List<OverPaymentDetailResponse>();
+            strings.Clear();
+            string selectQuery = @"SELECT * FROM OverPaymentDetail WHERE MemberID = " + id;
+            
+            try
+            {
+                //using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:/Users/Isaiah Yu/SQLite Databases/Overpayment_WebAPI.db", true))
+                using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\inetpub\wwwroot\overpayment_webapi\database\Overpayment_WebAPI.db", true))
+                {
+                    using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
+                    {
+                        conn.Open();                             // Open the connection to the database
+
+                        com.CommandText = selectQuery;     // Set CommandText to our query that will select all rows from the table
+                        com.ExecuteNonQuery();                  // Execute the query
+
+                        using (System.Data.SQLite.SQLiteDataReader reader = com.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                strings.Add(
+                                    "ID : " + reader["ID"].ToString() +
+                                    "OverPaymentID : " + reader["OverPaymentID"].ToString() +
+                                    "MemberID : " + reader["MemberID"].ToString() +
+                                    "ClaimNumber : " + reader["ClaimNumber"].ToString() +
+                                    "BalanceAmt : " + reader["BalanceAmt"].ToString() +
+                                    "OverPaymentAmt : " + reader["OverPaymentAmt"].ToString() +
+                                    "CreateDate : " + reader["CreateDate"].ToString() +
+                                    "SysSrcSyncDate : " + reader["SysSrcSyncDate"].ToString() +
+                                    "LastUpdated : " + reader["LastUpdated"].ToString()
+                                    );     // Display the value of the key and value column for every row
+
+                                /*var debugg = reader["CreateDate"];
+                                var debugg2 = Convert.ToDateTime(reader["CreateDate"]);
+                                var debugg3 = DateTime.UtcNow;
+                                var debugg4 = DateTime.UtcNow.ToString();*/
+
+                                //Console.WriteLine(debugg);
+
+                                overpaymentList.Add(new OverPaymentDetailResponse()
+                                {
+                                    memberId = Convert.ToInt32(reader["MemberID"]),
+                                    claimNumber = reader["ClaimNumber"].ToString(),
+                                    balanceAmt = String.Format("{0:0.00}", Convert.ToDecimal(reader["BalanceAmt"])),
+                                    overpaymentAmt = String.Format("{0:0.00}", Convert.ToDecimal(reader["OverpaymentAmt"])),
+                                    createDate = Convert.ToDateTime(reader["CreateDate"]),
+                                    updateDate = Convert.ToDateTime(reader["LastUpdated"]),
+                                    amtPaid = String.Format("{0:0.00}", Convert.ToDecimal(reader["OverpaymentAmt"]) - Convert.ToDecimal(reader["BalanceAmt"])),
+                                    daysLeftToPay = (int)(Convert.ToDateTime(reader["CreateDate"]).Subtract(DateTime.UtcNow).TotalDays + 90)
+                                });
+                            }
+                        }
+                        conn.Close();        // Close the connection to the database
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Data of error: " + e.Data);
+                Console.WriteLine("Source of error: " + e.Source);
+            }
+            //return strings;
+            //return JsonConvert.SerializeObject(overpaymentList, Newtonsoft.Json.Formatting.Indented);
+            return overpaymentList;
         }
 
         // POST api/values
@@ -106,9 +200,39 @@ namespace MentorshipWebAPI_001.Controllers
         }
 
         // DELETE api/values/5
-        public void Delete(int id)
+        public bool Delete(string id)
         {
-            strings.RemoveAt(id);
+            //strings.RemoveAt(id);
+            {
+                bool deleted = false;
+                //strings.Clear();
+                string deleteQuery = @"DELETE FROM OverpaymentDetail WHERE ClaimNumber = '" + id + "'";
+
+                try
+                {
+                    //using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:/Users/Isaiah Yu/SQLite Databases/Overpayment_WebAPI.db", true))
+                    using (System.Data.SQLite.SQLiteConnection conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\inetpub\wwwroot\overpayment_webapi\database\Overpayment_WebAPI.db", true))
+                    {
+                        using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(conn))
+                        {
+                            conn.Open();                             // Open the connection to the database
+
+                            com.CommandText = deleteQuery;     // Set CommandText to our query that will select all rows from the table
+                            com.ExecuteNonQuery();                  // Execute the query
+                            conn.Close();        // Close the connection to the database
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Data of error: " + e.Data);
+                    Console.WriteLine("Source of error: " + e.Source);
+                }
+                //return strings;
+                //return JsonConvert.SerializeObject(overpaymentList, Newtonsoft.Json.Formatting.Indented);
+                deleted = true;
+                return deleted;
+            }
         }
     }
 }
